@@ -10,6 +10,7 @@ trait HashTable {
 
 struct LinearProbingHashTable {
     capacity: usize,
+    used_capacity: usize,
     store: Vec<(String, String)>,
 }
 
@@ -17,6 +18,7 @@ impl LinearProbingHashTable {
     fn new(capacity: usize) -> Self {
         Self {
             capacity, 
+            used_capacity: 0,
             store: Vec::with_capacity(capacity)
         }
     }
@@ -48,21 +50,33 @@ impl HashTable for LinearProbingHashTable {
     }
 
     fn set(&mut self, key: String, value: String) -> Result<(), String> {
-        Ok(())
+
+        // Check if we are at capacity and we cannot insert any more items.
+        if self.used_capacity == self.capacity {
+            return Err("at capacity".to_string());
+        }
+
+        // If we still have space, we hash and insert. For now we fail if
+        // we have collisions.
+        let index = self.hash(&key);
+
+        match self.store.get(index) {
+            Some(_) => Err("collision".to_string()),
+            None => {
+                self.store.insert(index, (key, value));
+                self.used_capacity +=1;
+
+                Ok(())
+            }
+        }
     }
 }
 
 fn main() {
     println!("Hello, world!");
 
-    let table = LinearProbingHashTable::new(100);
+    let mut table = LinearProbingHashTable::new(100);
 
-    let keys = [
-        "hello".to_string(),
-        "bye".to_string()
-    ];
-
-    for key in keys.iter() {
-        println!("{}", table.hash(&key));
-    }
+    table.set("hello".to_string(), "there".to_string());
+    table.set("bye".to_string(), "again".to_string());
 }
