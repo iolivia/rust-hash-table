@@ -36,7 +36,15 @@ impl LinearProbingHashTable {
 impl HashTable for LinearProbingHashTable {
 
     fn get(&self, key: &String) -> Option<&String> {
-        None
+        // Map the key to an index
+        let index = self.hash(key);
+
+        // Check if it's there
+        // TODO this should do linear probing eventually
+        match self.store.get(index) {
+            Some(key_value) => Some(&key_value.1),
+            None => None
+        }
     }
 
     fn set(&mut self, key: String, value: String) -> Result<(), String> {
