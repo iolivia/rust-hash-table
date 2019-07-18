@@ -8,13 +8,13 @@ trait HashTable {
     fn set(&mut self, key: String, value: String) -> Result<(), String>;
 }
 
-struct LinearProbingHashTable {
+struct NoCollisionsHashTable {
     capacity: usize,
     used_capacity: usize,
     store: Vec<(String, String)>,
 }
 
-impl LinearProbingHashTable {
+impl NoCollisionsHashTable {
     fn new(capacity: usize) -> Self {
         Self {
             capacity, 
@@ -35,7 +35,7 @@ impl LinearProbingHashTable {
     }
 }
 
-impl HashTable for LinearProbingHashTable {
+impl HashTable for NoCollisionsHashTable {
 
     fn get(&self, key: &String) -> Option<&String> {
         // Map the key to an index
@@ -75,7 +75,7 @@ impl HashTable for LinearProbingHashTable {
 fn main() {
     println!("Hello, world!");
 
-    let mut table = LinearProbingHashTable::new(100);
+    let mut table = NoCollisionsHashTable::new(100);
 
     table.set("hello".to_string(), "there".to_string());
     table.set("bye".to_string(), "again".to_string());
