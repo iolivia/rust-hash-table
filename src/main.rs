@@ -74,9 +74,30 @@ impl HashTable for NoCollisionsHashTable {
 
 fn main() {
     println!("Hello, world!");
+}
 
-    let mut table = NoCollisionsHashTable::new(100);
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    table.set("hello".to_string(), "there".to_string());
-    table.set("bye".to_string(), "again".to_string());
+    #[test]
+    fn test_get_not_found() {
+       let table = NoCollisionsHashTable::new(10);
+       let item = table.get(&"hello".to_string());
+
+        assert!(item.is_none());
+    }
+
+    #[test]
+    fn test_get_found() {
+       let mut table = NoCollisionsHashTable::new(10);
+       let key = "hello".to_string();
+       let value = "there".to_string();
+       table.set(key.clone(), value.clone()).expect("set failed");
+
+       let item = table.get(&key);
+
+        assert!(item.is_some());
+        assert_eq!(item.unwrap(), &value);
+    }
 }
