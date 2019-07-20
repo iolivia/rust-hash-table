@@ -107,9 +107,17 @@ impl HashTable for NoCollisionsHashTable {
     fn remove(&mut self, key: &String) {
         let index = self.hash(&key);
 
-        if self.store[index].is_some() {
-            self.store[index] = None;
-            self.size -= 1;
+        match self.store[index].as_mut() {
+            Some(hash_vec) => {
+                match hash_vec.iter().find(|hash_item| hash_item.key == *key) {
+                    Some(_) => {
+                        hash_vec.retain(|hash_item| hash_item.key != *key);
+                        self.size -= 1;
+                    },
+                    None => ()
+                }
+            },
+            None => ()
         }
     }
 
@@ -437,6 +445,39 @@ mod tests {
     }
 
     #[test]
+    fn remove_with_collisions() {
+        // Arrange
+        let mut table = NoCollisionsHashTable::new(2);
+        let values = [
+            "hello", 
+            "aaaaaaaaa",
+            "again",
+            "and again",
+            "byeeeee",
+            "haaai",
+            "one more"
+        ];
+        for value in values.iter() {
+            let value = value.to_string();
+            table.insert(value.clone(), value.clone()).expect("insert failed");
+        }
+    
+        // Act
+        table.remove(&"and again".to_string());
+
+        // Assert
+        assert_eq!(table.size(), values.len() - 1);
+        for value in values.iter() {
+            if value != &"and again" {
+                let value = value.to_string();
+                let found = table.get(&value.to_string());
+
+                assert!(found.is_some(), "couldn't find {}", value);
+            }
+        }
+    }
+
+    #[test]
     fn size_when_empty() {
         // Arrange
         let table = NoCollisionsHashTable::new(3);
@@ -521,6 +562,5 @@ mod tests {
     // - remove last key of chain
     // - remove only key of chain
     // - remove middle key of chain
-    // - remove key which map to the same hash and make sure only that key is removed
     // Benchmark against std::HashTable
 }
