@@ -11,7 +11,7 @@ struct HashItem {
 // For now this is not a generic HashTable.
 trait HashTable {
     fn get(&self, key: &String) -> Option<&HashItem>;
-    fn set(&mut self, key: String, value: String) -> Result<(), String>;
+    fn insert(&mut self, key: String, value: String) -> Result<(), String>;
     fn remove(&mut self, key: &String);
     fn size(&self) -> usize;
 }
@@ -64,7 +64,7 @@ impl HashTable for NoCollisionsHashTable {
         }
     }
 
-    fn set(&mut self, key: String, value: String) -> Result<(), String> {
+    fn insert(&mut self, key: String, value: String) -> Result<(), String> {
 
         // Check if we are at capacity and we cannot insert any more items.
         if self.used_capacity == self.capacity {
@@ -116,11 +116,11 @@ mod tests {
     }
 
     #[test]
-    fn set_get() {
+    fn insert_get() {
         let mut table = NoCollisionsHashTable::new(10);
         let key = "hello".to_string();
         let value = "there".to_string();
-        table.set(key.clone(), value.clone()).expect("set failed");
+        table.insert(key.clone(), value.clone()).expect("insert failed");
 
         let item = table.get(&key);
 
@@ -130,7 +130,7 @@ mod tests {
     }
 
     #[test]
-    fn set_multiple() {
+    fn insert_multiple() {
         let mut table = NoCollisionsHashTable::new(20);
         let values = [
             "hello", 
@@ -140,20 +140,20 @@ mod tests {
 
         for value in values.iter() {
             let value = value.to_string();
-            table.set(value.clone(), value.clone()).expect("set failed");
+            table.insert(value.clone(), value.clone()).expect("insert failed");
         }
     
         assert_eq!(table.size(), values.len());
     }
 
     #[test]
-    fn set_remove_get() {
+    fn insert_remove_get() {
         let mut table = NoCollisionsHashTable::new(10);
         let key = "hello".to_string();
         let value = "there".to_string();
 
-        // Set
-        table.set(key.clone(), value.clone()).expect("set failed");
+        // insert
+        table.insert(key.clone(), value.clone()).expect("insert failed");
 
         // Remove
         table.remove(&key);
