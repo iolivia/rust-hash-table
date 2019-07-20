@@ -19,7 +19,7 @@ trait HashTable {
 struct NoCollisionsHashTable {
     capacity: usize,
     used_capacity: usize,
-    store: Vec<Option<HashItem>>,
+    store: Vec<Option<Vec<HashItem>>>,
 }
 
 impl NoCollisionsHashTable {
@@ -57,10 +57,12 @@ impl HashTable for NoCollisionsHashTable {
         let index = self.hash(key);
 
         // Check if it's there
-        // TODO this should do linear probing eventually
         match self.store.get(index) {
-            Some(hash_item) => hash_item.as_ref(),
-            None => None,
+            Some(Some(hash_vec)) => {
+                // find the key in the vec
+                hash_vec.iter().find(|hash_item| hash_item.key == *key)
+            }
+            _ => None,
         }
     }
 
@@ -77,16 +79,26 @@ impl HashTable for NoCollisionsHashTable {
         // we have collisions.
         let index = self.hash(&key);
 
-        match self.store.get(index) {
-            Some(Some(hash_item)) => {
-                if hash_item.key == key {
+        match self.store.get_mut(index) {
+            Some(Some(hash_vec)) => {
+
+                let duplicate_key = hash_vec.iter().find(|hash_item| hash_item.key == *key);
+
+                if duplicate_key.is_some() {
                     Err("duplicate key".to_string())
                 } else {
-                    Err("collision".to_string())
+                    // Insert it
+                    hash_vec.push(HashItem{key, value});
+                    self.used_capacity += 1;
+
+                    Ok(())  
                 }
             }
             Some(None) => {
-              self.store.insert(index, Some(HashItem{key, value,}));
+                let mut hash_vec = Vec::new();
+                hash_vec.push(HashItem{key, value});
+
+                self.store.insert(index, Some(hash_vec));
                 self.used_capacity += 1;
 
                 Ok(())  
