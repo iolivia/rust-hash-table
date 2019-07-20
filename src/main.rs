@@ -78,7 +78,13 @@ impl HashTable for NoCollisionsHashTable {
         let index = self.hash(&key);
 
         match self.store.get(index) {
-            Some(Some(_)) => Err("collision".to_string()),
+            Some(Some(hash_item)) => {
+                if hash_item.key == key {
+                    Err("duplicate key".to_string())
+                } else {
+                    Err("collision".to_string())
+                }
+            }
             Some(None) => {
               self.store.insert(index, Some(HashItem{key, value,}));
                 self.used_capacity += 1;
@@ -177,5 +183,18 @@ mod tests {
         // Remove
         table.remove(&key);
         assert_eq!(table.size(), 0);
+    }
+
+    #[test]
+    fn insert_same_key_fails() {
+        let mut table = NoCollisionsHashTable::new(10);
+        let key = "hello".to_string();
+        let value = "there".to_string();
+
+        // first insert should succeed
+        table.insert(key.clone(), value.clone()).expect("fail");
+
+        // second insert should fail
+        table.insert(key.clone(), value.clone()).expect_err("duplicate key");
     }
 }
