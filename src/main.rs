@@ -126,6 +126,34 @@ fn main() {
 mod tests {
     use super::*;
 
+    // Extra test cases
+    // get value of a key that does not exit on the table
+    // get value of a key when table is empty
+    // get value of last key when table is full
+    // get value "fast" for a key when table is big [O(1)]
+    // insert with key ""
+    // insert with key " "
+    // insert with key "  "
+    // insert with key "#∞§ª∞¢§ªjh∞§568"
+    // insert "capacity" number of items +1
+    // insert some "naughty strings"
+    // remove first key when table is full (does it affect the 
+    //   data structure holding the keys) [measure this]
+    // remove last inserted key [measure this]
+    // remove when the table is empty
+    // remove key that doesn't exist
+    // remove key which map to the same hash and make sure only
+    //   that key is removed
+    // size when the table is empty
+    // size after one insert
+    // size after one insert and one remove
+    // size after inserting "capacity" items
+    // Collisions!
+    // Insert more elements (2x, 3x, 10x) that the size of the table
+    //      Check distribution of keys
+    //      Performance when retrieving last key on a big set of keys (measure this)
+    // Remove a random key (like middle one) from one of the hashings with collision
+
     #[test]
     fn get_not_found() {
         let table = NoCollisionsHashTable::new(10);
