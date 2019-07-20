@@ -131,13 +131,8 @@ mod tests {
     // get value "fast" for a key when table is big [O(1)]
 
     // insert some "naughty strings"
-    // remove when the table is empty
-    // remove key that doesn't exist
     // remove key which map to the same hash and make sure only
     //   that key is removed
-    // size when the table is empty
-    // size after one insert
-    // size after one insert and one remove
     // size after inserting "capacity" items
     // Collisions!
     // Insert more elements (2x, 3x, 10x) that the size of the table
@@ -452,6 +447,83 @@ mod tests {
         table.insert(values[0].to_string(), "value".to_string()).expect("insert failed");
 
         // Assert
+        assert_eq!(table.size(), values.len());
+    }
+
+    #[test]
+    fn size_when_empty() {
+        // Arrange
+        let table = NoCollisionsHashTable::new(3);
+    
+        // Act & Assert
+        assert_eq!(table.size(), 0);
+    }
+
+    #[test]
+    fn size_after_one_insert() {
+        // Arrange
+        let mut table = NoCollisionsHashTable::new(3);
+        table.insert(" ".to_string(), "value1".to_string()).expect("insert failed");
+
+        // Act & Assert
+        assert_eq!(table.size(), 1);
+    }
+
+    #[test]
+    fn size_after_multiple_inserts() {
+        // Arrange
+        let mut table = NoCollisionsHashTable::new(3);
+        table.insert(" ".to_string(), "value1".to_string()).expect("insert failed");
+        table.insert("  ".to_string(), "value2".to_string()).expect("insert failed");
+
+        // Act & Assert
+        assert_eq!(table.size(), 2);
+    }
+
+    #[test]
+    fn size_after_one_insert_and_one_remove() {
+        // Arrange
+        let mut table = NoCollisionsHashTable::new(3);
+        table.insert(" ".to_string(), "value1".to_string()).expect("insert failed");
+        table.remove(&" ".to_string());
+
+        // Act & Assert
+        assert_eq!(table.size(), 0);
+    }
+
+    #[test]
+    fn size_at_capacity() {
+        // Arrange
+        let mut table = NoCollisionsHashTable::new(3);
+        let values = [
+            "hello", 
+            "aaaaaaaaa",
+            "again"
+        ];
+        for value in values.iter() {
+            let value = value.to_string();
+            table.insert(value.clone(), value.clone()).expect("insert failed");
+        }
+
+        // Act & Assert
+        assert_eq!(table.size(), values.len());
+    }
+
+    #[test]
+    fn size_over_capacity() {
+        // Arrange
+        let mut table = NoCollisionsHashTable::new(2);
+        let values = [
+            "hello", 
+            "aaaaaaaaa",
+            "again"
+        ];
+        for value in values.iter() {
+            let value = value.to_string();
+            table.insert(value.clone(), value.clone()).expect("insert failed");
+        }
+
+        // Act & Assert
         assert_eq!(table.size(), values.len());
     }
 }
