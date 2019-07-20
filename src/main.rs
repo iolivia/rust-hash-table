@@ -35,6 +35,8 @@ impl NoCollisionsHashTable {
         let mut hasher = DefaultHasher::new();
 
         // Hash our key
+        println!("{} as bytes -> {:?}", key, key.as_bytes());
+
         hasher.write(key.as_bytes());
 
         // Map to our capacity space and return
@@ -68,18 +70,21 @@ impl HashTable for NoCollisionsHashTable {
             return Err("at capacity".to_string());
         }
 
+        println!("{:?}", self.store);
+
         // If we still have space, we hash and insert. For now we fail if
         // we have collisions.
         let index = self.hash(&key);
 
         match self.store.get(index) {
-            Some(_) => Err("collision".to_string()),
-            None => {
-                self.store.insert(index, Some(HashItem{key, value,}));
+            Some(Some(_)) => Err("collision".to_string()),
+            Some(None) => {
+              self.store.insert(index, Some(HashItem{key, value,}));
                 self.used_capacity += 1;
 
-                Ok(())
+                Ok(())  
             }
+            None => panic!("invalid range")
         }
     }
 
@@ -114,7 +119,8 @@ mod tests {
         let item = table.get(&key);
 
         assert!(item.is_some());
-        assert_eq!(item.unwrap().key, value);
+        assert_eq!(item.unwrap().key, key);
+        assert_eq!(item.unwrap().value, value);
     }
 
     #[test]
@@ -123,7 +129,7 @@ mod tests {
         let values = [
             "hello", 
             "aaaaaaaaa",
-            // "again"
+            "again"
         ];
 
         for value in values.iter() {
