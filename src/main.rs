@@ -12,6 +12,7 @@ struct HashItem {
 trait HashTable {
     fn get(&self, key: &String) -> Option<&HashItem>;
     fn set(&mut self, key: String, value: String) -> Result<(), String>;
+    fn remove(&mut self, key: &String);
     fn size(&self) -> usize;
 }
 
@@ -88,6 +89,11 @@ impl HashTable for NoCollisionsHashTable {
         }
     }
 
+    fn remove(&mut self, key: &String) {
+        let index = self.hash(&key);
+        self.store[index] = None;
+    }
+
     fn size(&self) -> usize {
         self.used_capacity
     }
@@ -138,5 +144,22 @@ mod tests {
         }
     
         assert_eq!(table.size(), values.len());
+    }
+
+    #[test]
+    fn set_remove_get() {
+        let mut table = NoCollisionsHashTable::new(10);
+        let key = "hello".to_string();
+        let value = "there".to_string();
+
+        // Set
+        table.set(key.clone(), value.clone()).expect("set failed");
+
+        // Remove
+        table.remove(&key);
+
+        let item = table.get(&key);
+
+        assert!(item.is_none());
     }
 }
