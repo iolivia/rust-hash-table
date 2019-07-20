@@ -106,8 +106,11 @@ impl HashTable for NoCollisionsHashTable {
 
     fn remove(&mut self, key: &String) {
         let index = self.hash(&key);
-        self.store[index] = None;
-        self.size -= 1;
+
+        if self.store[index].is_some() {
+            self.store[index] = None;
+            self.size -= 1;
+        }
     }
 
     fn size(&self) -> usize {
@@ -128,9 +131,6 @@ mod tests {
     // get value "fast" for a key when table is big [O(1)]
 
     // insert some "naughty strings"
-    // remove first key when table is full (does it affect the 
-    //   data structure holding the keys) [measure this]
-    // remove last inserted key [measure this]
     // remove when the table is empty
     // remove key that doesn't exist
     // remove key which map to the same hash and make sure only
@@ -377,5 +377,81 @@ mod tests {
 
         // Act & Assert
         table.insert(key.clone(), value.clone()).expect_err("duplicate key");
+    }
+
+    #[test]
+    fn remove_when_empty() {
+        // Arrange
+        let mut table = NoCollisionsHashTable::new(3);
+    
+        // Act
+        table.remove(&"hello".to_string());
+
+        // Assert
+        assert_eq!(table.size(), 0);
+    }
+
+    #[test]
+    fn remove_first_key_at_capacity() {
+        // Arrange
+        let mut table = NoCollisionsHashTable::new(3);
+        let values = [
+            "hello", 
+            "aaaaaaaaa",
+            "again"
+        ];
+        for value in values.iter() {
+            let value = value.to_string();
+            table.insert(value.clone(), value.clone()).expect("insert failed");
+        }
+    
+        // Act
+        table.remove(&values[0].to_string());
+
+        // Assert
+        assert_eq!(table.size(), values.len() -  1);
+    }
+
+    #[test]
+    fn remove_last_key_at_capacity() {
+        // Arrange
+        let mut table = NoCollisionsHashTable::new(3);
+        let values = [
+            "hello", 
+            "aaaaaaaaa",
+            "again"
+        ];
+        for value in values.iter() {
+            let value = value.to_string();
+            table.insert(value.clone(), value.clone()).expect("insert failed");
+        }
+    
+        // Act
+        table.remove(&values[values.len() - 1].to_string());
+
+        // Assert
+        assert_eq!(table.size(), values.len() -  1);
+    }
+
+    #[test]
+    fn remove_first_key_at_capacity_then_insert_it_again() {
+        // Arrange
+        let mut table = NoCollisionsHashTable::new(3);
+        let values = [
+            "hello", 
+            "aaaaaaaaa",
+            "again"
+        ];
+        for value in values.iter() {
+            let value = value.to_string();
+            table.insert(value.clone(), value.clone()).expect("insert failed");
+        }
+        table.remove(&values[0].to_string());
+
+        // Act
+        table.insert(values[0].to_string(), "value".to_string()).expect("insert failed");
+
+        // Assert
+        assert_eq!(table.size(), values.len());
     }
 }
