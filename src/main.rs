@@ -102,7 +102,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_get_not_found() {
+    fn get_not_found() {
         let table = NoCollisionsHashTable::new(10);
         let item = table.get(&"hello".to_string());
 
@@ -110,7 +110,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get_found() {
+    fn set_get() {
         let mut table = NoCollisionsHashTable::new(10);
         let key = "hello".to_string();
         let value = "there".to_string();
@@ -124,7 +124,7 @@ mod tests {
     }
 
     #[test]
-    fn test_set_multiple() {
+    fn set_multiple() {
         let mut table = NoCollisionsHashTable::new(20);
         let values = [
             "hello", 
