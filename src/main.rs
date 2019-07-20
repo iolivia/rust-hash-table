@@ -55,10 +55,12 @@ impl HashTable for NoCollisionsHashTable {
     fn get(&self, key: &String) -> Option<&HashItem> {
         // Map the key to an index
         let index = self.hash(key);
-
+        println!("getting index {}", index);
+        
         // Check if it's there
         match self.store.get(index) {
             Some(Some(hash_vec)) => {
+                println!("vec {:?}", hash_vec);
                 // find the key in the vec
                 hash_vec.iter().find(|hash_item| hash_item.key == *key)
             }
@@ -98,7 +100,7 @@ impl HashTable for NoCollisionsHashTable {
                 let mut hash_vec = Vec::new();
                 hash_vec.push(HashItem{key, value});
 
-                self.store.insert(index, Some(hash_vec));
+                self.store[index] = Some(hash_vec);
                 self.size += 1;
 
                 Ok(())  
@@ -127,13 +129,9 @@ mod tests {
     use super::*;
 
     // Extra test cases
-    // get value of a key that does not exit on the table
-    // get value of a key when table is empty
-    // get value of last key when table is full
+    // ? get value of last key when table is full
     // get value "fast" for a key when table is big [O(1)]
-    // insert with key ""
-    // insert with key " "
-    // insert with key "  "
+
     // insert with key "#∞§ª∞¢§ªjh∞§568"
     // insert "capacity" number of items +1
     // insert some "naughty strings"
@@ -156,9 +154,26 @@ mod tests {
 
     #[test]
     fn get_not_found() {
-        let table = NoCollisionsHashTable::new(10);
+        // Arrange
+        let mut table = NoCollisionsHashTable::new(10);
+        table.insert("abc".to_string(), "def".to_string()).expect("fail");
+
+        // Act
         let item = table.get(&"hello".to_string());
 
+        // Assert
+        assert!(item.is_none());
+    }
+
+    #[test]
+    fn get_when_empty() {
+        // Arrange
+        let table = NoCollisionsHashTable::new(10);
+
+        // Act
+        let item = table.get(&"hello".to_string());
+
+        // Assert
         assert!(item.is_none());
     }
 
@@ -174,6 +189,45 @@ mod tests {
         assert!(item.is_some());
         assert_eq!(item.unwrap().key, key);
         assert_eq!(item.unwrap().value, value);
+    }
+
+    #[test]
+    fn insert_get_different_key_reference() {
+        let mut table = NoCollisionsHashTable::new(10);
+        let key1 = "hello".to_string();
+        let key2 = "hello".to_string();
+        let value = "there".to_string();
+        table.insert(key1.clone(), value.clone()).expect("insert failed");
+
+        let item = table.get(&key2);
+
+        assert!(item.is_some());
+        assert_eq!(item.unwrap().key, key1);
+        assert_eq!(item.unwrap().key, key2);
+        assert_eq!(item.unwrap().value, value);
+    }
+
+    #[test]
+    fn insert_empty() {
+        let mut table = NoCollisionsHashTable::new(20);
+
+        table.insert("".to_string(), "value".to_string()).expect("insert failed");
+    
+        assert_eq!(table.size(), 1);
+    }
+
+    #[test]
+    fn insert_spaces() {
+        let mut table = NoCollisionsHashTable::new(20);
+        table.insert(" ".to_string(), "value1".to_string()).expect("insert failed");
+        table.insert("  ".to_string(), "value2".to_string()).expect("insert failed");
+        table.insert("   ".to_string(), "value3".to_string()).expect("insert failed");
+    
+        assert_eq!(table.size(), 3);
+
+        assert_eq!(table.get(&" ".to_string()).unwrap().value, "value1");
+        assert_eq!(table.get(&"  ".to_string()).unwrap().value, "value2");
+        assert_eq!(table.get(&"   ".to_string()).unwrap().value, "value3");
     }
 
     #[test]
