@@ -1,10 +1,16 @@
 use std::collections::hash_map::DefaultHasher;
 use std::hash::Hasher;
 
+#[derive(Debug, Clone)]
+struct HashItem {
+    key: String, 
+    value: String
+}
+
 // Hash table trait, allows getting and setting.
 // For now this is not a generic HashTable.
 trait HashTable {
-    fn get(&self, key: &String) -> Option<&String>;
+    fn get(&self, key: &String) -> Option<&HashItem>;
     fn set(&mut self, key: String, value: String) -> Result<(), String>;
     fn size(&self) -> usize;
 }
@@ -12,7 +18,7 @@ trait HashTable {
 struct NoCollisionsHashTable {
     capacity: usize,
     used_capacity: usize,
-    store: Vec<(String, String)>,
+    store: Vec<Option<HashItem>>,
 }
 
 impl NoCollisionsHashTable {
@@ -20,7 +26,7 @@ impl NoCollisionsHashTable {
         Self {
             capacity,
             used_capacity: 0,
-            store: Vec::with_capacity(capacity),
+            store: vec![None; capacity],
         }
     }
 
@@ -33,7 +39,7 @@ impl NoCollisionsHashTable {
 
         // Map to our capacity space and return
         let hash_index = hasher.finish();
-        let index = (hash_index % (self.capacity as u64)) as usize;
+        let index = (hash_index % (self.capacity as u64 - 1)) as usize;
 
         println!("hash_index {}, capacity {}, index {}", hash_index, self.capacity, index);
 
@@ -43,14 +49,14 @@ impl NoCollisionsHashTable {
 
 impl HashTable for NoCollisionsHashTable {
 
-    fn get(&self, key: &String) -> Option<&String> {
+    fn get(&self, key: &String) -> Option<&HashItem> {
         // Map the key to an index
         let index = self.hash(key);
 
         // Check if it's there
         // TODO this should do linear probing eventually
         match self.store.get(index) {
-            Some(key_value) => Some(&key_value.1),
+            Some(hash_item) => hash_item.as_ref(),
             None => None,
         }
     }
@@ -69,7 +75,7 @@ impl HashTable for NoCollisionsHashTable {
         match self.store.get(index) {
             Some(_) => Err("collision".to_string()),
             None => {
-                self.store.insert(index, (key, value));
+                self.store.insert(index, Some(HashItem{key, value,}));
                 self.used_capacity += 1;
 
                 Ok(())
@@ -108,9 +114,10 @@ mod tests {
         let item = table.get(&key);
 
         assert!(item.is_some());
-        assert_eq!(item.unwrap(), &value);
+        assert_eq!(item.unwrap().key, value);
     }
 
+    #[test]
     fn test_set_multiple() {
         let mut table = NoCollisionsHashTable::new(20);
         let values = [
