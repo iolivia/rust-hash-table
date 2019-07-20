@@ -179,13 +179,16 @@ mod tests {
 
     #[test]
     fn insert_get() {
+        // Arrange
         let mut table = NoCollisionsHashTable::new(10);
         let key = "hello".to_string();
         let value = "there".to_string();
         table.insert(key.clone(), value.clone()).expect("insert failed");
 
+        // Act
         let item = table.get(&key);
 
+        // Assert
         assert!(item.is_some());
         assert_eq!(item.unwrap().key, key);
         assert_eq!(item.unwrap().value, value);
@@ -193,14 +196,17 @@ mod tests {
 
     #[test]
     fn insert_get_different_key_reference() {
+        // Arrange
         let mut table = NoCollisionsHashTable::new(10);
         let key1 = "hello".to_string();
         let key2 = "hello".to_string();
         let value = "there".to_string();
         table.insert(key1.clone(), value.clone()).expect("insert failed");
 
+        // Act
         let item = table.get(&key2);
 
+        // Assert
         assert!(item.is_some());
         assert_eq!(item.unwrap().key, key1);
         assert_eq!(item.unwrap().key, key2);
@@ -209,29 +215,50 @@ mod tests {
 
     #[test]
     fn insert_empty() {
+        // Arrange
         let mut table = NoCollisionsHashTable::new(20);
 
+        // Act
         table.insert("".to_string(), "value".to_string()).expect("insert failed");
     
+        // Assert
         assert_eq!(table.size(), 1);
     }
 
     #[test]
     fn insert_spaces() {
+        // Arrange
         let mut table = NoCollisionsHashTable::new(20);
         table.insert(" ".to_string(), "value1".to_string()).expect("insert failed");
         table.insert("  ".to_string(), "value2".to_string()).expect("insert failed");
         table.insert("   ".to_string(), "value3".to_string()).expect("insert failed");
     
+        // Act
         assert_eq!(table.size(), 3);
 
+        // Assert
         assert_eq!(table.get(&" ".to_string()).unwrap().value, "value1");
         assert_eq!(table.get(&"  ".to_string()).unwrap().value, "value2");
         assert_eq!(table.get(&"   ".to_string()).unwrap().value, "value3");
     }
 
     #[test]
+    fn insert_key_with_symbols() {
+        // Arrange
+        let mut table = NoCollisionsHashTable::new(20);
+        let key = "#∞§ª∞¢§ªjh∞§568".to_string();
+
+        // Act
+        table.insert(key.clone(), "value".to_string()).expect("insert failed");
+
+        // Assert
+        assert_eq!(table.size(), 1);
+        assert_eq!(table.get(&key).unwrap().value, "value");
+    }
+
+    #[test]
     fn insert_multiple() {
+        // Arrange
         let mut table = NoCollisionsHashTable::new(20);
         let values = [
             "hello", 
@@ -239,56 +266,55 @@ mod tests {
             "again"
         ];
 
+        // Act
         for value in values.iter() {
             let value = value.to_string();
             table.insert(value.clone(), value.clone()).expect("insert failed");
         }
     
+        // Assert
         assert_eq!(table.size(), values.len());
     }
 
     #[test]
     fn insert_remove_get() {
+        // Arrange
         let mut table = NoCollisionsHashTable::new(10);
         let key = "hello".to_string();
         let value = "there".to_string();
-
-        // insert
         table.insert(key.clone(), value.clone()).expect("insert failed");
-
-        // Remove
         table.remove(&key);
 
+        // Act
         let item = table.get(&key);
 
+        // Assert
         assert!(item.is_none());
     }
 
     #[test]
     fn insert_decrements_size() {
+        // Arrange
         let mut table = NoCollisionsHashTable::new(10);
         let key = "hello".to_string();
         let value = "there".to_string();
 
-        // insert
+        // Act & Assert
         table.insert(key.clone(), value.clone()).expect("insert failed");
         assert_eq!(table.size(), 1);
-
-        // Remove
         table.remove(&key);
         assert_eq!(table.size(), 0);
     }
 
     #[test]
     fn insert_same_key_fails() {
+        // Arrange
         let mut table = NoCollisionsHashTable::new(10);
         let key = "hello".to_string();
         let value = "there".to_string();
-
-        // first insert should succeed
         table.insert(key.clone(), value.clone()).expect("fail");
 
-        // second insert should fail
+        // Act & Assert
         table.insert(key.clone(), value.clone()).expect_err("duplicate key");
     }
 }
