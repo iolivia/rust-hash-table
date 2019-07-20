@@ -70,11 +70,6 @@ impl HashTable for NoCollisionsHashTable {
 
     fn insert(&mut self, key: String, value: String) -> Result<(), String> {
 
-        // Check if we are at capacity and we cannot insert any more items.
-        if self.size == self.capacity {
-            return Err("at capacity".to_string());
-        }
-
         println!("{:?}", self.store);
 
         // If we still have space, we hash and insert. For now we fail if
@@ -132,8 +127,6 @@ mod tests {
     // ? get value of last key when table is full
     // get value "fast" for a key when table is big [O(1)]
 
-    // insert with key "#∞§ª∞¢§ªjh∞§568"
-    // insert "capacity" number of items +1
     // insert some "naughty strings"
     // remove first key when table is full (does it affect the 
     //   data structure holding the keys) [measure this]
@@ -264,6 +257,74 @@ mod tests {
             "hello", 
             "aaaaaaaaa",
             "again"
+        ];
+
+        // Act
+        for value in values.iter() {
+            let value = value.to_string();
+            table.insert(value.clone(), value.clone()).expect("insert failed");
+        }
+    
+        // Assert
+        assert_eq!(table.size(), values.len());
+    }
+
+    #[test]
+    fn insert_at_capacity() {
+        // Arrange
+        let mut table = NoCollisionsHashTable::new(3);
+        let values = [
+            "hello", 
+            "aaaaaaaaa",
+            "again"
+        ];
+
+        // Act
+        for value in values.iter() {
+            let value = value.to_string();
+            table.insert(value.clone(), value.clone()).expect("insert failed");
+        }
+    
+        // Assert
+        assert_eq!(table.size(), values.len());
+    }
+
+    #[test]
+    fn insert_at_double_capacity() {
+        // Arrange
+        let mut table = NoCollisionsHashTable::new(3);
+        let values = [
+            "hello", 
+            "aaaaaaaaa",
+            "again",
+            "and again",
+            "byeeeee",
+            "haaai",
+            "one more"
+        ];
+
+        // Act
+        for value in values.iter() {
+            let value = value.to_string();
+            table.insert(value.clone(), value.clone()).expect("insert failed");
+        }
+    
+        // Assert
+        assert_eq!(table.size(), values.len());
+    }
+
+    #[test]
+    fn insert_at_a_lot_more_capacity() {
+        // Arrange
+        let mut table = NoCollisionsHashTable::new(2);
+        let values = [
+            "hello", 
+            "aaaaaaaaa",
+            "again",
+            "and again",
+            "byeeeee",
+            "haaai",
+            "one more"
         ];
 
         // Act
