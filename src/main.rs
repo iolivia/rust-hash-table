@@ -18,7 +18,7 @@ trait HashTable {
 
 struct NoCollisionsHashTable {
     capacity: usize,
-    used_capacity: usize,
+    size: usize,
     store: Vec<Option<Vec<HashItem>>>,
 }
 
@@ -26,7 +26,7 @@ impl NoCollisionsHashTable {
     fn new(capacity: usize) -> Self {
         Self {
             capacity,
-            used_capacity: 0,
+            size: 0,
             store: vec![None; capacity],
         }
     }
@@ -69,7 +69,7 @@ impl HashTable for NoCollisionsHashTable {
     fn insert(&mut self, key: String, value: String) -> Result<(), String> {
 
         // Check if we are at capacity and we cannot insert any more items.
-        if self.used_capacity == self.capacity {
+        if self.size == self.capacity {
             return Err("at capacity".to_string());
         }
 
@@ -89,7 +89,7 @@ impl HashTable for NoCollisionsHashTable {
                 } else {
                     // Insert it
                     hash_vec.push(HashItem{key, value});
-                    self.used_capacity += 1;
+                    self.size += 1;
 
                     Ok(())  
                 }
@@ -99,7 +99,7 @@ impl HashTable for NoCollisionsHashTable {
                 hash_vec.push(HashItem{key, value});
 
                 self.store.insert(index, Some(hash_vec));
-                self.used_capacity += 1;
+                self.size += 1;
 
                 Ok(())  
             }
@@ -110,11 +110,11 @@ impl HashTable for NoCollisionsHashTable {
     fn remove(&mut self, key: &String) {
         let index = self.hash(&key);
         self.store[index] = None;
-        self.used_capacity -= 1;
+        self.size -= 1;
     }
 
     fn size(&self) -> usize {
-        self.used_capacity
+        self.size
     }
 }
 
