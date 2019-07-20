@@ -92,6 +92,7 @@ impl HashTable for NoCollisionsHashTable {
     fn remove(&mut self, key: &String) {
         let index = self.hash(&key);
         self.store[index] = None;
+        self.used_capacity -= 1;
     }
 
     fn size(&self) -> usize {
@@ -161,5 +162,20 @@ mod tests {
         let item = table.get(&key);
 
         assert!(item.is_none());
+    }
+
+    #[test]
+    fn insert_decrements_size() {
+        let mut table = NoCollisionsHashTable::new(10);
+        let key = "hello".to_string();
+        let value = "there".to_string();
+
+        // insert
+        table.insert(key.clone(), value.clone()).expect("insert failed");
+        assert_eq!(table.size(), 1);
+
+        // Remove
+        table.remove(&key);
+        assert_eq!(table.size(), 0);
     }
 }
